@@ -13,8 +13,23 @@ Parameters Parameters::load_from_file(const std::string& filename)
 	input_file >> u_f >> u_0 >> r_is >> r_n >> q >> q_g >> R >> gamma >> M >> T >> T_0 >> eta_0 >> Cp;
 	input_file.close();
 
-	return { u_f, u_0, r_is, r_n, q, q_g, R, gamma, M, T, T_0, eta_0, Cp};
+	// Проверка диапазонов значений
+	if (u_f < 100.0 || u_f > 2000.0)
+	{
+		throw std::invalid_argument("u_f (Flow velocity) must be between 100 and 2000 m/s");
+	}
+	if (u_0 < 0.0 || u_0 > 1000.0)
+	{
+		throw std::invalid_argument("u_0 (Particle velocity) must be between 0 and 1000 m/s");
+	}
+	if (r_is < 1e-6 || r_is > 1e-4)
+	{
+		throw std::invalid_argument("r_is (Particle radius) must be between 1e-6 and 1e-4 meters");
+	}
+
+	return { u_f, u_0, r_is, r_n, q, q_g, R, gamma, M, T, T_0, eta_0, Cp };
 }
+
 
 double calculate_phi(const Parameters& params, const double& u)
 {
