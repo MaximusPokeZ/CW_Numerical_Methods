@@ -1,0 +1,3 @@
+/Users/vladimirzaslavtsev/University/Numerical_Methods/CW_NM/cmake-build-debug/CMakeFiles/CW_NM.dir
+/Users/vladimirzaslavtsev/University/Numerical_Methods/CW_NM/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/vladimirzaslavtsev/University/Numerical_Methods/CW_NM/cmake-build-debug/CMakeFiles/rebuild_cache.dir
