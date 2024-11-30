@@ -1,4 +1,20 @@
-# t real_time u xi
+# Constants and Parameters
+# Final flow velocity (u_f): 2000 (m/s) - The final velocity of the flow
+# Initial particle velocity (u_0): 1000 (m/s) - The initial velocity of the particle
+# Particle radius (r_is): 0.0001 (m) - The radius of the particle
+# Nozzle radius (r_n): 0.05 (m) - The radius of the nozzle
+# Particle density (q): 7874 (kg/m^3) - The density of the particle
+# Gas density (q_g): 1.2754 (kg/m^3) - The density of the gas
+# Gas constant (R): 8.31446 (J/(kg*K)) - The specific gas constant
+# Gamma: 1.4# Molar mass of air (M): 0.029 (kg/mol) - The molar mass of air
+# Gas temperature (T): 300 (K) - The temperature of the gas
+# Reference temperature (T_0): 291.15 (K) - The reference temperature for gas
+# Reference viscosity (eta_0): 1.827e-05 (Pa*s) - The reference viscosity of the gas
+# Specific heat capacity of the gas (Cp): 460 (J/(kg*K)) - The specific heat capacity of the gas
+# Speed of sound (Sound speed): 347.011 (m/s) - The speed of sound in the gas
+# Dynamic viscosity (Viscosity): 1.91093e-05 (Pa*s) - The dynamic viscosity of the gas
+
+# iter real_time velocity distance
 0 0 1000 0
 0.012 4.90794e-07 1000 0.000490795
 0.0264 1.07975e-06 1000 0.00107975

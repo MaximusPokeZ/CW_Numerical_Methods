@@ -60,7 +60,26 @@ void Runge_Kutta::save_to_file(
 		throw std::runtime_error("Failed to open file for writing: " + filename);
 	}
 
-	file << "# t real_time u xi\n";
+	file << "# Constants and Parameters\n";
+	file << "# Final flow velocity (u_f): " << parameters.u_f << " (m/s) - The final velocity of the flow\n";
+	file << "# Initial particle velocity (u_0): " << parameters.u_0 << " (m/s) - The initial velocity of the particle\n";
+	file << "# Particle radius (r_is): " << parameters.r_is << " (m) - The radius of the particle\n";
+	file << "# Nozzle radius (r_n): " << parameters.r_n << " (m) - The radius of the nozzle\n";
+	file << "# Particle density (q): " << parameters.q << " (kg/m^3) - The density of the particle\n";
+	file << "# Gas density (q_g): " << parameters.q_g << " (kg/m^3) - The density of the gas\n";
+	file << "# Gas constant (R): " << parameters.R << " (J/(kg*K)) - The specific gas constant\n";
+	file << "# Gamma: " << parameters.gamma;
+	file << "# Molar mass of air (M): " << parameters.M << " (kg/mol) - The molar mass of air\n";
+	file << "# Gas temperature (T): " << parameters.T << " (K) - The temperature of the gas\n";
+	file << "# Reference temperature (T_0): " << parameters.T_0 << " (K) - The reference temperature for gas\n";
+	file << "# Reference viscosity (eta_0): " << parameters.eta_0 << " (Pa*s) - The reference viscosity of the gas\n";
+	file << "# Specific heat capacity of the gas (Cp): " << parameters.Cp << " (J/(kg*K)) - The specific heat capacity of the gas\n";
+	file << "# Speed of sound (Sound speed): " << parameters.sound_speed << " (m/s) - The speed of sound in the gas\n";
+	file << "# Dynamic viscosity (Viscosity): " << parameters.viscosity << " (Pa*s) - The dynamic viscosity of the gas\n";
+	file << "\n";
+
+
+	file << "# iter real_time velocity distance\n";
 
 	double xi = 0;
 	double tau = (parameters.q * parameters.Cp * parameters.r_is * parameters.r_is * 6) / (3 * calculate_h(parameters));
@@ -72,8 +91,8 @@ void Runge_Kutta::save_to_file(
 	{
 		double t = data[i].first;
 		double u = data[i].second;
-		double r_t = (real_time * t) / data[data.size()-1].first;
-		double r_t_1 = (real_time * data[i + 1].first) / data[data.size()-1].first;
+		double r_t = (real_time * t) / data[data.size() - 1].first;
+		double r_t_1 = (real_time * data[i + 1].first) / data[data.size() - 1].first;
 		file << t << " " << r_t << " " << u << " " << xi << "\n";
 
 		if (i < data.size() - 1)
