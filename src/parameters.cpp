@@ -32,7 +32,7 @@ Parameters Parameters::load_from_file(const std::string& filename)
 
 double calculate_phi(const Parameters& params, const double& u)
 {
-	double mach = calculate_Mach_number(params.u_f, u, params.a); mach = (!(int)mach) ? params.u_f / params.a : mach;
+	double mach = calculate_Mach_number(params.u_f, u, params.a); mach = (mach < 0.001) ? params.u_f / params.a : mach;
 	double reynolds = calculate_Reynolds_number(params.q_g, params.r_is, u, params.u_f, params.viscosity);
 	double S = calculate_S(mach, params.gamma);
 	double C_i = calculate_C_i(mach, reynolds, S, params.u_f, params.a);
