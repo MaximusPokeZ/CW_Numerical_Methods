@@ -12,13 +12,15 @@ class Runge_Kutta
 
 public:
 
-	static std::vector<std::pair<double, double>> solve (double u0, double t0, double eps, double h, const Parameters& parameters);
+	static std::vector<std::pair<std::pair<double, double>, std::pair<double, double>>> solve (double u0, double t0, double eps, double h, const Parameters& parameters, long max_count = 1000000);
 
 
-	static void save_to_file(const std::string& filename, const std::vector<std::pair<double, double>>& data,
+	static void save_to_file(const std::string& filename, const std::vector<std::pair<std::pair<double, double>, std::pair<double, double>>>& data,
 							 const Parameters& parameters);
 
 };
+
+double get_r_t (const Parameters& p, const double& t);
 
 
 

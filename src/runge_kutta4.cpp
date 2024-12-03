@@ -2,24 +2,26 @@
 #include <iostream>
 
 
-
-std::vector<std::pair<double, double>> Runge_Kutta::solve(
-		double u0, double t0, double eps, double h, const Parameters& parameters)
+std::vector<std::pair<std::pair<double, double>, std::pair<double, double>>> Runge_Kutta::solve(
+		double u0, double t0, double eps, double h, const Parameters& parameters, long max_count)
 {
-	std::vector<std::pair<double, double>> results;
+	std::vector<std::pair<std::pair<double, double>, std::pair<double, double>>> results;
 
-	double t = t0;
+	double dt = t0, t = t0, n_t, xi = 0;
 	double u = u0;
-	double prev_u = u0;
+	double prev_u;
+	long int count = 0;
 
-	while (std::abs(parameters.u_f - u) >= eps)
+	while (std::abs(parameters.u_f - u) >= eps && count < max_count)
 	{
-		results.emplace_back(t, u);
+		++count;
 
-		double phi = calculate_phi(parameters, u);
-		auto velocity_function = [&phi, &parameters](double t, double u) -> double
+		results.emplace_back(std::make_pair(dt, xi), std::make_pair(u, t));
+
+		double f_i = calculate_phi(parameters, u);
+		auto velocity_function = [&f_i, &parameters](double t, double u) -> double
 		{
-			return phi * (parameters.u_f - u);
+			return f_i * (parameters.u_f - u);
 		};
 
 		double k1 = h * velocity_function(t, u);
@@ -29,29 +31,39 @@ std::vector<std::pair<double, double>> Runge_Kutta::solve(
 
 		double new_u = u + (k1 + 2 * k2 + 2 * k3 + k4) / 6.0;
 
-		double delta_u = std::abs(new_u - prev_u);
+		dt += h;
+		prev_u = u;
+		u = new_u;
+		if ((int)u == 999)
+		{
+			std::cout << "";
+ 		}
+		n_t = get_r_t(parameters, dt);
 
+
+		xi += 0.5 * (n_t - t) * (u + new_u);
+
+
+		t = n_t;
+		double delta_u = std::abs(new_u - prev_u);
 		if (delta_u > 2)
 		{
 			h *= 0.8;
 		}
 		else if (delta_u < 1)
 		{
-			h *= 1.2;
+			h *= 1.1;
 		}
-
-		prev_u = u;
-		u = new_u;
-		t += h;
 	}
 
 	return results;
 }
 
 
+
 void Runge_Kutta::save_to_file(
 		const std::string& filename,
-		const std::vector<std::pair<double, double>>& data,
+		const std::vector<std::pair<std::pair<double, double>, std::pair<double, double>>>& data,
 		const Parameters& parameters)
 {
 	std::ofstream file(filename);
@@ -60,7 +72,7 @@ void Runge_Kutta::save_to_file(
 		throw std::runtime_error("Failed to open file for writing: " + filename);
 	}
 
-	file << "# Constants and Parameters\n";
+	file << "# Constants and Parameters\n\n";
 	file << "# Final flow velocity (u_f): " << parameters.u_f << " (m/s) - The final velocity of the flow\n";
 	file << "# Initial particle velocity (u_0): " << parameters.u_0 << " (m/s) - The initial velocity of the particle\n";
 	file << "# Particle radius (r_is): " << parameters.r_is << " (m) - The radius of the particle\n";
@@ -74,32 +86,32 @@ void Runge_Kutta::save_to_file(
 	file << "# Reference temperature (T_0): " << parameters.T_0 << " (K) - The reference temperature for gas\n";
 	file << "# Reference viscosity (eta_0): " << parameters.eta_0 << " (Pa*s) - The reference viscosity of the gas\n";
 	file << "# Specific heat capacity of the gas (Cp): " << parameters.Cp << " (J/(kg*K)) - The specific heat capacity of the gas\n";
-	file << "# Speed of sound (Sound speed): " << parameters.sound_speed << " (m/s) - The speed of sound in the gas\n";
+	file << "# Speed of sound (Sound speed): " << parameters.a << " (m/s) - The speed of sound in the gas\n";
 	file << "# Dynamic viscosity (Viscosity): " << parameters.viscosity << " (Pa*s) - The dynamic viscosity of the gas\n";
-	file << "\n";
+	file << "\n\n\n";
 
 
-	file << "# iter real_time velocity distance\n";
 
-	double xi = 0;
-	double tau = (parameters.q * parameters.Cp * parameters.r_is * parameters.r_is * 6) / (3 * calculate_h(parameters));
-	double real_time = tau * std::log(std::abs(parameters.u_f - parameters.u_0) / (0.01 * parameters.u_f));
+	file << "\n\n\n# iter real_time (s) velocity (m/s) distance (m)\n";
 
-	std::cout << "\nTotal time: " << real_time << "\n";
-
-	for (size_t i = 0; i < data.size(); ++i)
+	double max_dt = data[data.size() - 1].first.first;
+	for (long i = 0; i < data.size(); ++i)
 	{
-		double t = data[i].first;
-		double u = data[i].second;
-		double r_t = (real_time * t) / data[data.size() - 1].first;
-		double r_t_1 = (real_time * data[i + 1].first) / data[data.size() - 1].first;
-		file << t << " " << r_t << " " << u << " " << xi << "\n";
-
-		if (i < data.size() - 1)
-		{
-			xi += 0.5 * (r_t_1 - r_t) * (data[i].second + data[i + 1].second);
-		}
+		double xi = data[i].first.second;
+		double u = data[i].second.first;
+		double t = data[i].second.second;
+		file << i << " " << t / max_dt << " " << u << " " << xi / max_dt << "\n";
 	}
 
+	file << "\n\n# Total time: " << parameters.time << " s";
+	file << "\n# Total distance: " << data[data.size() - 1].first.second / max_dt << " m";
+	std::cout << "\nTotal time: " << parameters.time << " s\n";
+
 	file.close();
+}
+
+double get_r_t (const Parameters& p, const double& t)
+{
+	double r_t = (p.time * t);
+	return r_t;
 }

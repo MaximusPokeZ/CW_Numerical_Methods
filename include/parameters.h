@@ -22,8 +22,9 @@ struct Parameters
 	const double eta_0;    // Контрольная вязкость газа
 	const double Cp; // Удельная теплоемкость вещества
 
-	const double sound_speed = calculate_sound_speed(R, gamma, M, T); // Скорость звука
+	const double a = calculate_sound_speed(R, gamma, M, T); // Скорость звука
 	const double viscosity = calculate_viscosity(eta_0, T_0, T);    // Вязкость
+	double time = 0.0;
 
 	static Parameters load_from_file(const std::string& filename);
 
@@ -33,7 +34,7 @@ struct Parameters
 			: u_f(u_f), u_0(u_0), r_is(r_is), r_n(r_n),
 			  q(q), q_g(q_g), R(R), gamma(gamma), M(M),
 			  T(T), T_0(T_0), eta_0(eta_0), Cp(Cp),
-			  sound_speed(calculate_sound_speed(R, gamma, M, T)),
+			  a(calculate_sound_speed(R, gamma, M, T)),
 			  viscosity(calculate_viscosity(eta_0, T_0, T)) {}
 
 private:
@@ -53,15 +54,17 @@ double calculate_phi(const Parameters& params, const double& u);
 
 double calculate_stocks (double q, double r_is, double a_s, double eta, double r_n);
 
-double calculate_C_i (double M, double Re, double S);
+double calculate_C_i (double M, double Re, double S, double u, double a);
 
-double calculate_Mach_number (double u_f, double a_s);
+double calculate_Mach_number (double u_f, double u, double a_s);
 
 double calculate_Reynolds_number (double q, double r_is, double u, double u_f, double eta);
 
 double calculate_S (double M, double gamma);
 
 double calculate_h (const Parameters& param);
+
+double r_t(const Parameters& parameters);
 
 
 

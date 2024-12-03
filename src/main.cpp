@@ -6,9 +6,11 @@ int main()
 {
 	try
 	{
-		const Parameters params = Parameters::load_from_file("./resources/input.txt");
+		Parameters params = Parameters::load_from_file("./resources/input.txt");
+		params.time = r_t(params);
 
-		double eps = 0.001, h = 0.01;
+
+		double eps = 0.01, h = 0.001;
 
 		auto result = Runge_Kutta::solve(params.u_0, params.t_0, eps, h, params);
 		Runge_Kutta::save_to_file("result/result.txt", result, params);
