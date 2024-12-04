@@ -42,40 +42,45 @@ double calculate_phi(const Parameters& params, const double& u)
 
 double calculate_stocks (double q, double r_is, double a_s, double eta, double r_n)
 {
-	double temp = (2 * q * r_is * a_s) / (9 * eta);
+	double temp = (2 * q * r_is * r_is * a_s) / (9 * eta * r_n);
 	return temp;
 }
 
-double calculate_C_i(double M, double Re, double S, double u, double a, const Parameters& p) {
-	double SR = std::sqrt(Re);
-	double AK2 = std::sqrt(p.Cp / 2.0);
-	double AMR = p.viscosity / (p.q * 2 * p.r_is * p.a);
+double calculate_C_i(double M, double Re, double S, double u, double a, const Parameters& p)
+{
+	double sqrtRe = std::sqrt(Re);
 
-	// Экспоненциальные коэффициенты
-	double EX1 = std::exp(-0.247 / (AK2 * AMR));
-	double EX2 = std::exp(-0.5 * M / SR);
-	double EX3 = std::exp(-AMR);
+	double AMR = p.viscosity / (p.q_g * 2 * p.r_is * p.a);
 
-	// Расчёт для подзвукового потока
-	double A1 = 24.0 / (1.0 + AK2 * AMR * (4.33 + ((3.65 - 1.53 * p.T) / (1.0 + 0.353 * p.T)) * EX1));
-	double B2 = 0.03 * Re + 0.48 * SR;
-	double A2 = ((4.5 + 0.38 * B2) / (1.0 + B2) + (0.1 + 0.2 * M) * M * M) * EX2 * Re;
-	double A3 = 0.6 * AK2 * M * (1.0 - EX3) * Re;
+	double dd = -0.247 / (S * AMR);
+	double ex1 = std::exp(dd);
+	double A1 = 24.0 / (1.0 + S * AMR * (4.33 + ((3.65 - 1.53) / (1.0 + 0.353)) * ex1));
+
+	double B2 = 0.03 * Re + 0.48 * sqrtRe;
+	double ex2 = std::exp(-0.5 * M / sqrtRe);
+	double A2 = ((4.5 + 0.38 * B2) / (1.0 + B2) + 0.1 * M * M + 0.2 * std::pow(M, 8)) * ex2 * Re;
+
+	double ex3 = std::exp(-AMR);
+	double A3 = 0.6 * S * M * (1.0 - ex3) * Re;
 
 	double f1 = A1 + A2 + A3;
 
-	// Расчёт для сверхзвукового потока
-	double f2 = (0.9 + 0.34 / (M * M) + 1.86 * std::sqrt(M / Re) *
-										(2 + 2 / (S * S) + 1.058 / S - 1 / pow(S, 4))) /
-				(1 + 1.86 * std::sqrt(M / Re));
-
-	// Условие для переходного режима
+	double sqrtAMR = std::sqrt(AMR);
+	double AM2 = M * M;
+	double AMK = 1.0 / (S * AM2);
+	double f2 = (0.9 + 0.34 / AM2 + 1.86 * sqrtAMR * (2.0 + 1.058 / M * std::sqrt(2.0 / S) +
+													  4.0 * AMK * (2.0 - AMK))) / (1.0 + 1.86 * sqrtAMR) * Re;
 	double f;
-	if (M < 1.0) {
-		f = f1;
-	} else if (M >= 1.0 && M <= 1.75) {
+	if (M >= 1.0 && M <= 1.75)
+	{
 		f = f1 + (4.0 / 3.0) * (M - 1.0) * (f2 - f1);
-	} else {
+	}
+	else if (M < 1.0)
+	{
+		f = f1;
+	}
+	else
+	{
 		f = f2;
 	}
 
