@@ -2,10 +2,10 @@
 #include <iostream>
 
 
-std::vector<std::pair<std::pair<double, double>, std::pair<double, double>>> Runge_Kutta::solve(
+std::vector<std::pair<std::pair<std::pair<double, double>, std::pair<double, double>>, std::pair<double, double>>> Runge_Kutta::solve(
 		double u0, double t0, double eps, double h, const Parameters& parameters, long max_count)
 {
-	std::vector<std::pair<std::pair<double, double>, std::pair<double, double>>> results;
+	std::vector<std::pair<std::pair<std::pair<double, double>, std::pair<double, double>>, std::pair<double, double>>> results;
 
 	double dt = t0, t = t0, n_t, xi = 0;
 	double u = u0;
@@ -15,42 +15,40 @@ std::vector<std::pair<std::pair<double, double>, std::pair<double, double>>> Run
 	while (std::abs(parameters.u_f - u) >= eps && count < max_count)
 	{
 		++count;
-
-		results.emplace_back(std::make_pair(dt, xi), std::make_pair(u, t));
-
 		double f_i = calculate_phi(parameters, u);
 		auto velocity_function = [&f_i, &parameters](double t, double u) -> double
 		{
 			return f_i * (parameters.u_f - u);
 		};
 
+		results.emplace_back(std::make_pair(std::make_pair(dt, xi), std::make_pair(u, t)), std::make_pair(h, f_i));
+
+
+
 		double k1 = h * velocity_function(t, u);
+		f_i = calculate_phi(parameters, u + k1 / 2);
 		double k2 = h * velocity_function(t + h / 2, u + k1 / 2);
+		f_i = calculate_phi(parameters, u + k2 / 2);
 		double k3 = h * velocity_function(t + h / 2, u + k2 / 2);
+		f_i = calculate_phi(parameters, u + k3);
 		double k4 = h * velocity_function(t + h, u + k3);
 
 		double new_u = u + (k1 + 2 * k2 + 2 * k3 + k4) / 6.0;
 
 		dt += h;
-		prev_u = u;
-		u = new_u;
-		if ((int)u == 999)
-		{
-			std::cout << "";
- 		}
-		n_t = get_r_t(parameters, dt);
-
-
+		n_t = dt;
 		xi += 0.5 * (n_t - t) * (u + new_u);
 
-
+		prev_u = u;
+		u = new_u;
 		t = n_t;
+
 		double delta_u = std::abs(new_u - prev_u);
-		if (delta_u > 2)
+		if (delta_u > 0.2)
 		{
 			h *= 0.8;
 		}
-		else if (delta_u < 1)
+		else if (delta_u < 0.1)
 		{
 			h *= 1.1;
 		}
@@ -63,7 +61,7 @@ std::vector<std::pair<std::pair<double, double>, std::pair<double, double>>> Run
 
 void Runge_Kutta::save_to_file(
 		const std::string& filename,
-		const std::vector<std::pair<std::pair<double, double>, std::pair<double, double>>>& data,
+		const std::vector<std::pair<std::pair<std::pair<double, double>, std::pair<double, double>>, std::pair<double, double>>>& data,
 		const Parameters& parameters)
 {
 	std::ofstream file(filename);
@@ -92,35 +90,24 @@ void Runge_Kutta::save_to_file(
 
 
 
-	file << "\n\n\n# iter real_time (s) velocity (m/s) distance (m)\n";
+	file << "\n\n\n# i  t  v  x  h  fi\n";
 
-	double max_dt = data[data.size() - 1].first.first;
+	double max_t = data[data.size() - 1].first.first.first;
+	double max_s = data[data.size() - 1].first.first.second;
 	for (long i = 0; i < data.size(); ++i)
 	{
-		double xi = data[i].first.second;
-		double u = data[i].second.first;
-		double t = data[i].second.second;
-		file << i << " " << t / max_dt << " " << u << " " << xi / max_dt << "\n";
+		double fi =  data[i].second.second;
+		double h =  data[i].second.first;
+		double xi = data[i].first.first.second;
+		double u = data[i].first.second.first;
+		double t = data[i].first.second.second;
+		file << i <<  " " << t << " " << u << " " << xi << " " << h << " " << fi <<"\n";
 	}
 
-	file << "\n\n# Total time: " << parameters.time << " s";
-	file << "\n# Total distance: " << data[data.size() - 1].first.second / max_dt << " m";
-	std::cout << "\nTotal time: " << parameters.time << " s\n";
+	file << "\n\n# Total time: " << max_t << " s";
+	file << "\n# Total distance: " << max_s  << " m";
+	std::cout << "\nTotal time: " << max_t<< " s\n";
 
 	file.close();
 }
 
-
-
-
-
-
-
-
-
-
-double get_r_t (const Parameters& p, const double& t)
-{
-	double r_t = (p.time * t);
-	return r_t;
-}

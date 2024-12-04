@@ -7,8 +7,6 @@ int main()
 	try
 	{
 		Parameters params = Parameters::load_from_file("./resources/input.txt");
-		params.time = r_t(params);
-
 
 		double eps = 0.001, h = 0.001;
 

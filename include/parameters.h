@@ -24,7 +24,6 @@ struct Parameters
 
 	const double a = calculate_sound_speed(R, gamma, M, T); // Скорость звука
 	const double viscosity = calculate_viscosity(eta_0, T_0, T);    // Вязкость
-	double time = 0.0;
 
 	static Parameters load_from_file(const std::string& filename);
 
@@ -54,18 +53,13 @@ double calculate_phi(const Parameters& params, const double& u);
 
 double calculate_stocks (double q, double r_is, double a_s, double eta, double r_n);
 
-double calculate_C_i (double M, double Re, double S, double u, double a);
+double calculate_C_i (double M, double Re, double S, double u, double a, const Parameters& p);
 
 double calculate_Mach_number (double u_f, double u, double a_s);
 
 double calculate_Reynolds_number (double q, double r_is, double u, double u_f, double eta);
 
 double calculate_S (double M, double gamma);
-
-double calculate_h (const Parameters& param);
-
-double r_t(const Parameters& parameters);
-
 
 
 #endif //CW_NM_PARAMETERS_H
