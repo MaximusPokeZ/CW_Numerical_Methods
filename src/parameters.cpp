@@ -13,19 +13,6 @@ Parameters Parameters::load_from_file(const std::string& filename)
 	input_file >> u_f >> u_0 >> r_is >> r_n >> q >> q_g >> R >> gamma >> M >> T >> T_0 >> eta_0 >> Cp;
 	input_file.close();
 
-//	if (u_f < 100.0 || u_f > 2000.0)
-//	{
-//		throw std::invalid_argument("u_f (Flow velocity) must be between 100 and 2000 m/s");
-//	}
-//	if (u_0 < 0.0 || u_0 > 1000.0)
-//	{
-//		throw std::invalid_argument("u_0 (Particle velocity) must be between 0 and 1000 m/s");
-//	}
-//	if (r_is < 1e-6 || r_is > 1e-4)
-//	{
-//		throw std::invalid_argument("r_is (Particle radius) must be between 1e-6 and 1e-4 meters");
-//	}
-
 	return { u_f, u_0, r_is, r_n, q, q_g, R, gamma, M, T, T_0, eta_0, Cp };
 }
 
@@ -57,7 +44,7 @@ double calculate_C_i(double M, double Re, double S, double u, double a, const Pa
 	double A1 = 24.0 / (1.0 + S * AMR * (4.33 + ((3.65 - 1.53) / (1.0 + 0.353)) * ex1));
 
 	double B2 = 0.03 * Re + 0.48 * sqrtRe;
-	double ex2 = std::exp(-0.5 * M / sqrtRe);
+	double ex2 = std::exp(-0.5 * AMR * sqrtRe);
 	double A2 = ((4.5 + 0.38 * B2) / (1.0 + B2) + 0.1 * M * M + 0.2 * std::pow(M, 8)) * ex2 * Re;
 
 	double ex3 = std::exp(-AMR);
